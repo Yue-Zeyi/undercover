@@ -2,7 +2,7 @@
 import { onMounted, ref, watch } from 'vue';
 import AppIcon from './AppIcon.vue';
 // #ifdef H5
-import qrcode from 'qrcode-generator';
+import { createQrCanvas } from '../services/qr';
 // #endif
 
 const props = defineProps<{
@@ -27,35 +27,6 @@ function drawRoundedRect(context: CanvasRenderingContext2D, x: number, y: number
   context.arcTo(x, y + height, x, y, r);
   context.arcTo(x, y, x + width, y, r);
   context.closePath();
-}
-
-function createQrCanvas(): HTMLCanvasElement {
-  const code = qrcode(0, 'M');
-  code.addData(props.inviteUrl, 'Byte');
-  code.make();
-
-  const moduleCount = code.getModuleCount();
-  const margin = 4;
-  const cellSize = Math.max(4, Math.floor(480 / (moduleCount + margin * 2)));
-  const size = (moduleCount + margin * 2) * cellSize;
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const context = canvas.getContext('2d');
-  if (!context) throw new Error('当前浏览器无法生成二维码');
-  context.imageSmoothingEnabled = false;
-
-  context.fillStyle = '#ffffff';
-  context.fillRect(0, 0, size, size);
-  context.fillStyle = '#172923';
-  for (let row = 0; row < moduleCount; row += 1) {
-    for (let column = 0; column < moduleCount; column += 1) {
-      if (code.isDark(row, column)) {
-        context.fillRect((column + margin) * cellSize, (row + margin) * cellSize, cellSize, cellSize);
-      }
-    }
-  }
-  return canvas;
 }
 
 function drawPoster(qrCanvas: HTMLCanvasElement): string {
@@ -112,7 +83,7 @@ function generateImages() {
     return;
   }
   try {
-    const qrCanvas = createQrCanvas();
+    const qrCanvas = createQrCanvas(props.inviteUrl);
     qrDataUrl.value = qrCanvas.toDataURL('image/png');
     posterDataUrl.value = drawPoster(qrCanvas);
   } catch (error) {

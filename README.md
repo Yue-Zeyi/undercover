@@ -22,6 +22,7 @@ npm run dev
 
 - 创建房间、人数和卧底数设置、8 个词库主题、3 档难度和混合难度、60/90/120 秒发言。
 - 昵称、8 个头像、准备、房主转移、邀请链接与房间号。H5 大厅邀请弹窗会本地生成房间二维码和邀请海报，支持保存图片、复制链接和系统分享；iPhone 未自动下载时可长按图片保存。
+- H5 首次访问会提示保存平台入口二维码，支持下载或长按截图；完成提示后会在本机记住状态，不再重复打扰。
 - 服务端随机发词，同房间用完当前筛选词池才重复，每局随机交换平民词与卧底词；各客户端只收到自己的词语，结束前不公开身份。
 - 看词确认、按座位轮流文字发言、服务器超时推进。
 - 不可投自己，每轮每人一票；平票候选人再次发言后重投；无人投票则进入下一轮。
@@ -84,6 +85,8 @@ H5 产物在 `dist/build/h5`；微信小程序产物在 `dist/build/mp-weixin`�
 2. 使用进程管理工具常驻运行 `npm start`，默认监听 3001。
 3. 将 `dist/build/h5` 作为静态站点，用反向代理把 `/api/` 和 `/ws` 转发给后端。
 4. 为站点配置 HTTPS，WebSocket 自动使用 WSS。浏览器前后端使用同源地址，不需要配置跨域。
+
+生产 H5 可以不设置 `VITE_API_BASE_URL`，前端会按当前访问地址请求同源的 `/api` 和 `/ws`；这样同一份静态包可以换域名部署。若使用独立 API 域名，再在构建前设置该变量，并确认 HTTPS 与 WebSocket 域名均可访问。
 
 Nginx 的相关 location 配置如下，应放在已配置证书的 server 块内：
 
@@ -155,9 +158,10 @@ server/word-selection.ts    同房间去重抽词
 src/services/connection.ts  uni-app 请求、心跳与重连
 src/services/sound.ts       音效开关与轻量提示音
 src/services/invite.ts      H5 邀请链接拼接与跨端回退文本
+src/services/qr.ts          H5 二维码矩阵与图片生成
 src/stores/game.ts          会话恢复及 Pinia 状态
-src/pages/index/index.vue   页面入口、邀请和弹窗
-src/components/             大厅、对局、邀请分享和通用控件
+src/pages/index/index.vue   页面入口、入口提示、邀请和弹窗
+src/components/             大厅、对局、入口提示、邀请分享和通用控件
 src/static/                 人物插画、头像和 Lucide 图标
 tests/                      客户端连接与恢复测试
 ```

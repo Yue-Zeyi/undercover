@@ -13,12 +13,16 @@ import InviteShare from '../../components/InviteShare.vue';
 import HomeView from '../../components/HomeView.vue';
 import LobbyView from '../../components/LobbyView.vue';
 import MatchView from '../../components/MatchView.vue';
-import { createInviteUrl, roomInviteText } from '../../services/invite';
+import { createEntryUrl, createInviteUrl, roomInviteText } from '../../services/invite';
+// #ifdef H5
+import PlatformEntryPrompt from '../../components/PlatformEntryPrompt.vue';
+// #endif
 
 const game = useGameStore();
 const inviteCode = ref('');
 const showRules = ref(false);
 const showInvite = ref(false);
+const showEntryPrompt = ref(false);
 const showLeave = ref(false);
 const privacyEpoch = ref(0);
 const pageInsets = ref<Record<string, string>>({});
@@ -32,6 +36,27 @@ function getInviteLink(code: string): string {
   return link;
 }
 const inviteUrl = computed(() => game.room ? getInviteLink(game.room.code) : '');
+const entryUrl = computed(() => {
+  let link = '';
+  // #ifdef H5
+  if (typeof window !== 'undefined') link = createEntryUrl(window.location.href);
+  // #endif
+  return link;
+});
+// #ifdef H5
+const ENTRY_PROMPT_KEY = 'wodi:platform-entry-prompt:v1';
+function maybeShowEntryPrompt() {
+  try {
+    if (window.localStorage.getItem(ENTRY_PROMPT_KEY) !== '1') showEntryPrompt.value = true;
+  } catch {
+    showEntryPrompt.value = true;
+  }
+}
+function dismissEntryPrompt() {
+  showEntryPrompt.value = false;
+  try { window.localStorage.setItem(ENTRY_PROMPT_KEY, '1'); } catch { /* Private mode may block storage. */ }
+}
+// #endif
 // #ifdef MP-WEIXIN
 function updatePageInsets() {
   const { screenHeight, safeArea } = uni.getWindowInfo();
@@ -68,7 +93,7 @@ function readInviteFromUrl() {
   const code = route.searchParams.get('room') || current.searchParams.get('room');
   if (code && /^\d{6}$/.test(code)) inviteCode.value = code;
 }
-onMounted(() => { readInviteFromUrl(); window.addEventListener('hashchange', readInviteFromUrl); });
+onMounted(() => { readInviteFromUrl(); maybeShowEntryPrompt(); window.addEventListener('hashchange', readInviteFromUrl); });
 onUnmounted(() => { window.removeEventListener('hashchange', readInviteFromUrl); });
 // #endif
 async function loadSystemConfig() {
@@ -154,6 +179,12 @@ function goHome() {
       </view>
       <button class="btn btn-primary btn-wide" @tap="showRules = false">明白了</button>
     </ModalShell>
+
+    <!-- #ifdef H5 -->
+    <ModalShell v-if="showEntryPrompt" title="先保存平台入口" @close="dismissEntryPrompt">
+      <PlatformEntryPrompt :entry-url="entryUrl" :system-name="systemConfig.systemName" @done="dismissEntryPrompt" />
+    </ModalShell>
+    <!-- #endif -->
 
     <ModalShell v-if="showInvite && game.room" title="留个座，等你来" @close="showInvite = false">
       <!-- #ifndef MP-WEIXIN -->

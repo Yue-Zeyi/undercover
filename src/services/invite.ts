@@ -13,6 +13,13 @@ export function createInviteUrl(baseUrl: string, roomCode: string): string {
   return url.toString();
 }
 
+export function createEntryUrl(baseUrl: string): string {
+  const url = new URL(baseUrl);
+  url.search = '';
+  url.hash = '/pages/index/index';
+  return url.toString();
+}
+
 export function roomInviteText(roomCode: string): string {
   return `房间号：${roomCode}`;
 }
