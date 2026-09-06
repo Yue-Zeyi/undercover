@@ -21,7 +21,7 @@ npm run dev
 ## 已实现
 
 - 创建房间、人数和卧底数设置、8 个词库主题、3 档难度和混合难度、60/90/120 秒发言。
-- 昵称、8 个头像、准备、房主转移、邀请链接与房间号。
+- 昵称、8 个头像、准备、房主转移、邀请链接与房间号。H5 大厅邀请弹窗会本地生成房间二维码和邀请海报，支持保存图片、复制链接和系统分享；iPhone 未自动下载时可长按图片保存。
 - 服务端随机发词，同房间用完当前筛选词池才重复，每局随机交换平民词与卧底词；各客户端只收到自己的词语，结束前不公开身份。
 - 看词确认、按座位轮流文字发言、服务器超时推进。
 - 不可投自己，每轮每人一票；平票候选人再次发言后重投；无人投票则进入下一轮。
@@ -154,9 +154,10 @@ server/words.ts             词库汇总与公开数量统计
 server/word-selection.ts    同房间去重抽词
 src/services/connection.ts  uni-app 请求、心跳与重连
 src/services/sound.ts       音效开关与轻量提示音
+src/services/invite.ts      H5 邀请链接拼接与跨端回退文本
 src/stores/game.ts          会话恢复及 Pinia 状态
 src/pages/index/index.vue   页面入口、邀请和弹窗
-src/components/             大厅、对局和通用控件
+src/components/             大厅、对局、邀请分享和通用控件
 src/static/                 人物插画、头像和 Lucide 图标
 tests/                      客户端连接与恢复测试
 ```

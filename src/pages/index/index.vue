@@ -7,9 +7,13 @@ import { requestSystemConfig } from '../../services/connection';
 import { isSoundEnabled, setSoundEnabled, playSound } from '../../services/sound';
 import AppIcon from '../../components/AppIcon.vue';
 import ModalShell from '../../components/ModalShell.vue';
+// #ifdef H5
+import InviteShare from '../../components/InviteShare.vue';
+// #endif
 import HomeView from '../../components/HomeView.vue';
 import LobbyView from '../../components/LobbyView.vue';
 import MatchView from '../../components/MatchView.vue';
+import { createInviteUrl, roomInviteText } from '../../services/invite';
 
 const game = useGameStore();
 const inviteCode = ref('');
@@ -20,6 +24,14 @@ const privacyEpoch = ref(0);
 const pageInsets = ref<Record<string, string>>({});
 const systemConfig = ref<SystemConfig>({ ...DEFAULT_SYSTEM_CONFIG });
 const soundEnabled = ref(isSoundEnabled());
+function getInviteLink(code: string): string {
+  let link = roomInviteText(code);
+  // #ifdef H5
+  if (typeof window !== 'undefined') link = createInviteUrl(window.location.href, code);
+  // #endif
+  return link;
+}
+const inviteUrl = computed(() => game.room ? getInviteLink(game.room.code) : '');
 // #ifdef MP-WEIXIN
 function updatePageInsets() {
   const { screenHeight, safeArea } = uni.getWindowInfo();
@@ -76,14 +88,6 @@ function copyRoom() {
   if (!game.room) return;
   uni.setClipboardData({ data: game.room.code, success: () => uni.showToast({ title: '房间号已复制', icon: 'none' }) });
 }
-function copyInvite() {
-  if (!game.room) return;
-  let link = `房间号：${game.room.code}`;
-  // #ifdef H5
-  link = `${window.location.origin}${window.location.pathname}#/pages/index/index?room=${game.room.code}`;
-  // #endif
-  uni.setClipboardData({ data: link, success: () => uni.showToast({ title: '邀请已复制', icon: 'none' }) });
-}
 function leaveRoom() {
   showLeave.value = false;
   showInvite.value = false;
@@ -123,7 +127,7 @@ function goHome() {
     <view v-if="game.room && !game.atHome" class="room-page">
       <view class="room-header">
         <view><text class="room-label">{{ game.room.phase === 'lobby' ? '好友房' : game.room.phase === 'result' ? '本局结束' : '游戏进行中' }}</text><view class="row room-number"><text class="mono">{{ game.room.code }}</text><button class="icon-button" aria-label="复制房间号" title="复制房间号" @tap="copyRoom"><AppIcon name="copy" :size="18" /></button></view></view>
-        <view class="room-tools"><view v-if="isConnected" class="live-status"><view class="dot" /><text>已连接</text></view><button class="icon-button home-button" aria-label="返回首页" title="返回首页，保留座位" :disabled="game.busy" @tap="goHome"><AppIcon name="house" :size="20" /></button><button class="btn leave-button" aria-label="退出房间" title="退出房间" :disabled="game.busy" @tap="showLeave = true"><AppIcon name="log-out" :size="17" /><text class="leave-label">退出房间</text></button></view>
+        <view class="room-tools"><view v-if="isConnected" class="live-status"><view class="dot" /><text>已连接</text></view><button v-if="game.room.phase === 'lobby'" class="icon-button room-share-button" aria-label="邀请好友" title="生成二维码邀请好友" @tap="showInvite = true"><AppIcon name="qr-code" :size="19" /></button><button class="icon-button home-button" aria-label="返回首页" title="返回首页，保留座位" :disabled="game.busy" @tap="goHome"><AppIcon name="house" :size="20" /></button><button class="btn leave-button" aria-label="退出房间" title="退出房间" :disabled="game.busy" @tap="showLeave = true"><AppIcon name="log-out" :size="17" /><text class="leave-label">退出房间</text></button></view>
       </view>
       <LobbyView v-if="game.room.phase === 'lobby'" :room="game.room" @invite="showInvite = true" />
       <MatchView v-else :room="game.room" :privacy-epoch="privacyEpoch" />
@@ -152,12 +156,11 @@ function goHome() {
     </ModalShell>
 
     <ModalShell v-if="showInvite && game.room" title="留个座，等你来" @close="showInvite = false">
-      <view class="invite-code"><text class="small muted">房间号</text><text class="mono">{{ game.room.code }}</text></view>
       <!-- #ifndef MP-WEIXIN -->
-      <button class="btn btn-primary btn-wide" @tap="copyInvite"><AppIcon name="link" light :size="18" /><text>复制邀请链接</text></button>
-      <button class="text-button copy-code-button" @tap="copyRoom"><AppIcon name="copy" :size="15" /><text>仅复制房间号</text></button>
+      <InviteShare :room-code="game.room.code" :invite-url="inviteUrl" :system-name="systemConfig.systemName" />
       <!-- #endif -->
       <!-- #ifdef MP-WEIXIN -->
+      <view class="invite-code"><text class="small muted">房间号</text><text class="mono">{{ game.room.code }}</text></view>
       <button class="btn btn-primary btn-wide" open-type="share"><AppIcon name="send" light :size="18" /><text>邀请微信好友</text></button>
       <button class="text-button copy-code-button" @tap="copyRoom"><AppIcon name="copy" :size="15" /><text>复制房间号</text></button>
       <!-- #endif -->
