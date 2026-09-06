@@ -64,15 +64,14 @@ watch(() => props.entryUrl, () => {
 <template>
   <!-- #ifdef H5 -->
   <view class="entry-prompt">
-    <view class="entry-lead"><view class="entry-icon"><AppIcon name="fingerprint" :size="18" light /></view><text>保存平台入口</text></view>
-    <text class="entry-title">截图或保存二维码，下次扫码即可进入</text>
+    <text class="entry-title">保存二维码，下次扫码即可进入</text>
     <view v-if="generating" class="entry-loading"><view class="connection-spinner" /><text>正在生成入口二维码…</text></view>
     <text v-else-if="errorMessage" class="entry-error">{{ errorMessage }}</text>
     <template v-else>
       <view class="entry-qr-frame"><image class="entry-qr" :src="qrDataUrl" mode="aspectFit" /></view>
       <text class="entry-name">{{ systemName || '谁是卧底' }} · 好友局</text>
-      <button class="btn btn-primary btn-wide" @tap="saveQr"><AppIcon name="download" light :size="17" /><text>保存二维码到手机</text></button>
-      <text class="entry-hint">也可以长按二维码图片保存</text>
+      <button class="btn btn-primary btn-wide" @tap="saveQr"><AppIcon name="download" light :size="17" /><text>保存二维码</text></button>
+      <text class="entry-hint">也可长按图片保存</text>
     </template>
     <button class="btn btn-primary btn-wide entry-done" @tap="emit('done')"><AppIcon name="check" :size="15" light /><text>已保存，开始游戏</text></button>
   </view>
@@ -81,8 +80,6 @@ watch(() => props.entryUrl, () => {
 
 <style scoped lang="scss">
 .entry-prompt { color: var(--ink); }
-.entry-lead { display: flex; align-items: center; gap: 9px; color: var(--green); font-size: 13px; font-weight: 700; }
-.entry-icon { width: 31px; height: 31px; display: flex; align-items: center; justify-content: center; background: var(--green); border-radius: 8px; }
 .entry-title { display: block; font-size: 18px; line-height: 1.45; font-weight: 750; margin-top: 17px; }
 .entry-loading { min-height: 230px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--muted); font-size: 12px; }
 .entry-error { display: block; color: #b84f42; font-size: 12px; line-height: 1.7; text-align: center; padding: 24px 0; }
