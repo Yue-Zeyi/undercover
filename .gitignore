@@ -1,0 +1,28 @@
+node_modules/
+dist/
+data/
+
+# Local configuration and credentials. Keep only the template in git.
+.env
+.env.*
+!.env.example
+
+# Local output and deployment archives.
+*.log
+*.zip
+*.7z
+*.rar
+bt-deploy-*/
+mp-weixin-deploy-*/
+bt-make-zip-*.ps1
+.playwright-cli/
+.superpowers/
+
+# Planning and design notes are kept outside the public source repository.
+docs/
+
+# Editor and coverage output.
+.vscode/
+.idea/
+coverage/
+*.tsbuildinfo

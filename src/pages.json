@@ -1,0 +1,9 @@
+{
+  "pages": [{ "path": "pages/index/index", "style": {
+    // #ifndef MP-WEIXIN
+    "navigationStyle": "custom",
+    // #endif
+    "navigationBarTitleText": "谁是卧底"
+  } }],
+  "globalStyle": { "navigationBarTextStyle": "black", "navigationBarBackgroundColor": "#f6f8f7", "backgroundColor": "#f6f8f7" }
+}

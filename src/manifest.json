@@ -1,0 +1,11 @@
+{
+  "name": "谁是卧底",
+  "appid": "__UNI__WODIPARTY",
+  "description": "和朋友一起玩谁是卧底",
+  "versionName": "0.1.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "h5": { "title": "谁是卧底 · 好友局", "router": { "mode": "hash" } },
+  "mp-weixin": { "appid": "", "setting": { "urlCheck": true }, "usingComponents": true },
+  "vueVersion": "3"
+}
